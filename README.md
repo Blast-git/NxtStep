@@ -59,8 +59,8 @@ This is a comprehensive **employment platform** designed to streamline the recru
 ### **1. Clone the Repository**
 
 ```sh
- git clone https://github.com/your-repo/employment-platform.git
- cd employment-platform
+ git clone https://github.com/<username>/NxtStep.git
+ cd NxtStep
 ```
 
 ### **2. Backend Setup**
@@ -105,13 +105,5 @@ Start the backend:
 4. Push to the branch: `git push origin feature-branch`
 5. Create a Pull Request.
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-### **Contact**
-
-For queries or suggestions, contact us at [mail].
 
