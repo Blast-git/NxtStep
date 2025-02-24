@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
     is_active: {
         type: Boolean,
         default: true
+    },
+    role:{
+        type:String,
+        enum:["Candidate","Recruiter"]
     }
 });
 
