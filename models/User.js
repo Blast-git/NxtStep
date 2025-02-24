@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema({
     
     created_at: {
         type: Date,
-        default: Date.now
     },
     last_login: {
         type: Date,
@@ -38,6 +37,8 @@ const userSchema = new mongoose.Schema({
         type:String,
         enum:["Candidate","Recruiter"]
     }
-});
+},{
+    timestamps: true
+  });
 
 module.exports = mongoose.model("User", userSchema);
