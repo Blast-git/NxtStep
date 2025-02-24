@@ -20,7 +20,7 @@ exports.startSimulation = async (req, res) => {
             start_time: new Date(),
             end_time: null,
             score: null, 
-            recording_url: null,
+            //recording_url: null,
             feedback: null
         });
         const savedSimulation = await newSimulation.save();
