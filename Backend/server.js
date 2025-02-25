@@ -9,10 +9,10 @@ app.use(cookieParser());
 
 app.use(express.json())
 
-require("./config/database").connect()
+require("./src/config/database.js").connect()
 
 //route import and mount
-const user = require("./routes/user")   
+const user = require("./src/routes/user.js")   
 app.use("/api/v1",user)
 
 app.listen(PORT,()=>{
