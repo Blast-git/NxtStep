@@ -4,6 +4,7 @@ const router = express.Router();
 const { login, signup } = require("../controllers/userController");
 const { auth, isCandidate, isRecruiter } = require("../middlewares/auth");
 const { startSimulation, endSimulation } = require("../controllers/interviewSimulatorController");
+const { createCourse, getAllCourses, updateCourse, deleteCourse} = require("../controllers/coursesController")
 
 router.post("/login", login);
 router.post("/signup", signup);
@@ -22,7 +23,15 @@ router.get("/recruiter", auth, isRecruiter, (req, res) => {
     });
 });
 
-router.post("/start", startSimulation);
-router.put("/end/:id", endSimulation);
+router.post("/simulation/start", auth, isCandidate, startSimulation);
+router.put("/simulation/end/:id", auth, isCandidate, endSimulation); 
+
+
+router.post("/courses", auth, isRecruiter, createCourse);
+router.get("/courses", getAllCourses);
+router.put("/courses/:id", auth, isRecruiter, updateCourse);
+router.delete("/courses/:id", auth, isRecruiter, deleteCourse);
+
+
 
 module.exports = router;
