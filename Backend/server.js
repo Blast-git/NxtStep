@@ -12,8 +12,8 @@ app.use(express.json())
 require("./src/config/database.js").connect()
 
 //route import and mount
-const user = require("./src/routes/user.js")   
-app.use("/api/v1",user)
+const routes = require("./src/routes/index.js");
+app.use("/api/v1", routes);
 
 app.listen(PORT,()=>{
     console.log(`App is listening at ${PORT}`)

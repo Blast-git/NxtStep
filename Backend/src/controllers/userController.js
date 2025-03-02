@@ -1,16 +1,15 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const JWT = require("jsonwebtoken");
+require("dotenv").config(); // Ensure dotenv is loaded
 
-
-// signup route handler
 exports.signup = async (req, res) => {
     try {
-        // Get data
+        
         const { first_name, last_name, email, password, role } = req.body;
 
         // Check if user already exists
-        const existingUser = await User.findOne({email});
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -18,18 +17,10 @@ exports.signup = async (req, res) => {
             });
         }
 
-        // secure password
-        let hashedPassword;
-        try {
-            hashedPassword = await bcrypt.hash(password, 10);
-        } catch (err) {
-            return res.status(500).json({
-                success: false,
-                message: "Error hashing password",
-            });
-        }
+        // Secure password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // create a new user entry
+        // Create a new user entry
         const user = await User.create({
             email,
             password_hash: hashedPassword,
@@ -39,6 +30,17 @@ exports.signup = async (req, res) => {
             last_login: null, 
             is_active: true,
             role,
+        });
+
+        const payload = { id: user._id, email: user.email, role: user.role };
+        const token = JWT.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRE || "2h",
+        });
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
         });
 
         return res.status(201).json({
@@ -53,79 +55,77 @@ exports.signup = async (req, res) => {
                 is_active: user.is_active,
                 role: user.role,
             },
-        });
-    } catch (err) {
+            token,
+        })
+
+
+    } 
+    catch (err) {
         console.error(err);
         return res.status(500).json({
             success: false,
             message: "User cannot be registered. Please try again later.",
-        });
+        })
     }
-};
+}
 
 
 
-exports.login = async(req,res)=>{
-    try{
-        const {email,password}=req.body;
+exports.login = async (req, res) => {
+    try {
+        const {email,password} = req.body;
 
-        if(!email || !password){
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
                 message: "Email and password are required",
-            })
+            });
         }
 
-        const user=await User.findOne({email});
-        if(!email){
+        const user = await User.findOne({ email });
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid email or password",
-            })
-        }
-        const payload ={
-            email:user.email,
-            id:user._id,
-            role:user.role
+            });
         }
 
-        if(await bcrypt.compare(password,user.password_hash)){
-            //password matched
-            let token = JWT.sign(payload,
-                                process.env.JWT_SECRET,
-                                {
-                                    expiresIn:process.env.JWT_EXPIRE
-                                }
-            )
-            const userObj = user.toObject();
-            userObj.token = token;
-            userObj.password_hash = undefined;
-
-            const options={
-                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-                httpOnly: true, //client side will not get access
-            }
-            return res.cookie("token", token , options).status(200).json({
-                success:true,
-                token,
-                user:userObj,
-                message:"Login Successfull",
-            })
-
-        }
-        else{
+        // Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        if (!isPasswordValid) {
             return res.status(403).json({
-                success:false,
-                message:"Please enter correct password"
-            })
+                success: false,
+                message: "Invalid email or password",
+            });
         }
 
-    }
-    catch(error){
+        // Generate jwt token
+        const payload = { id: user._id, email: user.email, role: user.role };
+        const token = JWT.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRE || "2h",
+        });
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        });
+
+        const userObj = user.toObject();
+        delete userObj.password_hash;
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            user: userObj,
+        });
+
+    } catch (error) {
         console.error(error);
         return res.status(500).json({
             success: false,
             message: "Error logging in user",
-        })
+        });
     }
 }
