@@ -6,7 +6,7 @@ const { createJobPosting, getAllJobs, getJobById, updateJobPosting, deleteJobPos
 router.post("/", auth, isRecruiter, createJobPosting);
 router.get("/", getAllJobs);
 router.get("/:id", getJobById);
-router.put("/:id", updateJobPosting);
+router.put("/:id", auth, isRecruiter, updateJobPosting);
 router.delete("/:id", auth, isRecruiter, deleteJobPosting);
 
-module.exports = router;
+module.exports = router

@@ -6,7 +6,6 @@ const { createProfile, getProfile, updateProfile, deleteProfile, getAllProfiles 
 router.post("/", auth, createProfile);
 router.get("/", auth, getProfile);
 router.put("/", auth, updateProfile);
-router.delete("/", auth, deleteProfile);
 router.get("/all", auth, isRecruiter, getAllProfiles);
 
 module.exports = router;

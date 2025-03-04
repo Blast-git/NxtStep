@@ -49,7 +49,8 @@ exports.createProfile = async (req, res) => {
         message: "Profile created successfully",
         profile,
       });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error creating profile" });
   }
@@ -105,26 +106,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Delete a user profile
-exports.deleteProfile = async (req, res) => {
-  try {
-    const user_id = req.user.id;
-    const deletedProfile = await UserProfile.findOneAndDelete({ user_id });
-
-    if (!deletedProfile) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Profile not found" });
-    }
-
-    res
-      .status(200)
-      .json({ success: true, message: "Profile deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error deleting profile" });
-  }
-};
 
 // Get all user profiles (for recruiters)
 exports.getAllProfiles = async (req, res) => {
