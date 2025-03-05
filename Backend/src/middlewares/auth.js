@@ -1,72 +1,68 @@
-const jwt = require("jsonwebtoken")
-require("dotenv").config()
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-exports.auth = (req,res,next)=>{
-    try{
-        //extract jwt token
-        const token = req.cookies.token
-        if(!token || token===undefined){
+exports.auth = (req, res, next) => {
+    try {
+        // Extract JWT token from cookies or Authorization header
+        const token = req.cookies.token || (req.header("Authorization") && req.header("Authorization").replace("Bearer ", ""));
+
+        if (!token) {
             return res.status(401).json({
-                success:false,
-                message: "No token provided"
-            })
+                success: false,
+                message: "No token provided. Authentication failed."
+            });
         }
-        //verify token
-        try{
+
+        // Verify token
+        try {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
-            console.log(payload)
-            req.user = payload //it's use is in line 38, 
-        }
-        catch(err){
+            req.user = payload; // Store user data in request object
+        } catch (err) {
             return res.status(401).json({
-                success:false,
-                message:"Token invalid"
-            })
+                success: false,
+                message: "Invalid or expired token. Please log in again."
+            });
         }
-        next()
-    }
-    catch(err){
-        return res.status(401).json({
-            success:false,
-            message:"Something went wrong while verifying token"
-        })
-    }
-}
 
-exports.isCandidate =(req,res,next)=>{
-    try{
-        if(req.user.role !=="Candidate"){
-            return res.status(403).json({
-                success:false,
-                message: "This is protected route for Candidate"
-            })
-        }
-        next()
-    }
-    catch(err){
+        next(); // Proceed to next middleware
+    } catch (err) {
         return res.status(500).json({
-            success:false,
-            message:"user role not matching"
-            })
-        
+            success: false,
+            message: "Error while verifying token."
+        });
     }
-}
+};
 
-
-exports.isRecruiter =(req,res,next)=>{
-    try{
-        if(req.user.role !=="Recruiter"){
+exports.isCandidate = (req, res, next) => {
+    try {
+        if (!req.user || req.user.role !== "Candidate") {
             return res.status(403).json({
-                success:false,
-                message: "This is protected route for recruiter"
-            })
+                success: false,
+                message: "Protected route for candidates only"
+            });
         }
-        next()
-    }
-    catch(err){
+        next();
+    } catch (err) {
         return res.status(500).json({
-            success:false,
-            message:"user role not matching"
-            })
+            success: false,
+            message: "Error verifying user role."
+        });
     }
-}
+};
+
+exports.isRecruiter = (req, res, next) => {
+    try {
+        if (!req.user || req.user.role !== "Recruiter") {
+            return res.status(403).json({
+                success: false,
+                message: "Protected route for recruiters only"
+            });
+        }
+        next();
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Error verifying user role."
+        });
+    }
+};
